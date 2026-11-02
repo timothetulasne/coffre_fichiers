@@ -51,3 +51,23 @@ En exploitant cette vulnérabilité suite à l'interception ou la fuite d'un tok
 ---
 
 ## 6. Remédiation
+On ajoute la condition manquante à la fonction de vérification du token de session.
+```python
+def verify_token(token: str):
+    """Renvoie le nom d'utilisateur si le token est valide, None sinon."""
+    try:
+        encoded, signature = token.split(".")
+        payload = base64.urlsafe_b64decode(encoded)
+        username, expiration = payload.decode().rsplit("|", 1)
+    except ValueError:
+        return None  # token mal formé
+
+    if signature != sign(payload):
+        return None
+    
+    temps = int(time.time())
+    if temps > expiration :
+        return None
+        
+    return username
+```

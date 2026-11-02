@@ -22,7 +22,7 @@ def verify_token(token: str):
 
     if signature != sign(payload):
         return None
-
+        
     # L'expiration est conservée dans le token pour un usage futur.
     return username
 
