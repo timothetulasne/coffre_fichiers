@@ -4,19 +4,26 @@ import base64
 import hashlib
 import hmac
 import time
+import os
 
-from app.config import TOKEN_SECRET, TOKEN_TTL
+#from app.config import TOKEN_SECRET, TOKEN_TTL
 
 
 # ---------------------------------------------------------------- mots de passe
 
 def hash_password(password: str) -> str:
-    """Renvoie l'empreinte stockée pour un mot de passe."""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Renvoie le sel et l'empreinte stockée pour un mot de passe."""
+    sel = os.urandom(16) # sel sur 16 octects pour éviter les colisions
+    return f"{sel.hex()}:{hashlib.sha256(sel + password.encode()).hexdigest()}"
 
 
 def verify_password(password: str, stored_hash: str) -> bool:
-    return hash_password(password) == stored_hash
+    sel_hex, hache_hex = stored_hash.split(":")
+    sel = bytes.fromhex(sel_hex)
+    hache_clc = hashlib.sha256(sel + password.encode('utf-8')).digest()
+    
+    # Utilisation de compare_digest pour éviter les attaques par analyse temporelle
+    return hache_clc.hex() == hache_hex
 
 
 # ---------------------------------------------------------------------- tokens
