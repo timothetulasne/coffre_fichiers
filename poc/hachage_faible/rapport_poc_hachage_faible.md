@@ -63,8 +63,8 @@ Pour sécuriser le stockage des mots de passe, il est nécessaire de remplacer S
 ```python
 def hash_password(password: str) -> str:
     """Renvoie le sel et l'empreinte stockée pour un mot de passe."""
-    sel = os.urandom(16)
-    hache = hashlib.sha256(salt + password.encode('utf-8')).hexdigest()
+    sel = os.urandom(16) # sel sur 16 octects pour éviter les colisions
+    hache = hashlib.sha256(sel + password.encode('utf-8')).hexdigest()
     return f"{sel.hex()}:{hache}"
 
 
@@ -79,3 +79,19 @@ def verify_password(password: str, stored_value: str) -> bool:
     except (ValueError, AttributeError):
         return False
 ```
+
+a = hash_password("motdepasse-alice")
+b = hash_password("motdepasse-alice")
+
+sel_a, hache_a = a.split(":")
+sel_b, hache_b = b.split(":")
+print(a,int(sel_a,16))
+print("\n")
+print(b,int(sel_b,16))
+
+
+616c257548b15b1b7b9103411d5129bb:159b867ba757cc796e528ac24ec17ef7e96946f47c14dbc6278720e1ce73fc09
+--> sel = 129496643393206281155808329900156332475
+
+88072ede251eed3cbb886414d27d7184:d3d3846ab023419130499c277e41d27ae3a73e1633eb5bf2779b81fb02f084fb 
+--> sel = 180812304095740482110992372681813094788

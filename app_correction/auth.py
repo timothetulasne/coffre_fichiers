@@ -6,7 +6,7 @@ import hmac
 import time
 import os
 
-#from app.config import TOKEN_SECRET, TOKEN_TTL
+from app.config import TOKEN_SECRET, TOKEN_TTL
 
 
 # ---------------------------------------------------------------- mots de passe
