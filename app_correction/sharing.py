@@ -29,19 +29,8 @@ def public_key_pem(public_key) -> str:
 
 def wrap_key(file_key: bytes, public_key) -> bytes:
     """Chiffre une clé de fichier (32 octets) avec la clé publique RSA."""
-    n = public_key.public_numbers().n
-    e = public_key.public_numbers().e
-
-    m = int.from_bytes(file_key, "big")
-    c = pow(m, e, n)  # c = m^e mod n
-    return c.to_bytes(public_key.key_size // 8, "big")
-
+    return public_key.encrypt(file_key,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
 
 def unwrap_key(wrapped: bytes, private_key) -> bytes:
     """Déchiffre une clé de fichier avec la clé privée RSA."""
-    n = private_key.public_key().public_numbers().n
-    d = private_key.private_numbers().d
-
-    c = int.from_bytes(wrapped, "big")
-    m = pow(c, d, n)  # m = c^d mod n
-    return m.to_bytes(32, "big")
+    return private_key.decrypt(wrapped,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
