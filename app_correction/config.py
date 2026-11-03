@@ -1,7 +1,11 @@
+import os
+
 """Configuration du service CoffreFichiers."""
 
 # Clé utilisée pour signer les tokens de session (HMAC).
-TOKEN_SECRET = b"polytech"
+TOKEN_SECRET = os.environ.get("TOKEN_SECRET")
+if not TOKEN_SECRET:
+    raise RuntimeError("pas de secret de signature présent")
 
 # Durée de validité d'un token, en secondes.
 TOKEN_TTL = 3600
