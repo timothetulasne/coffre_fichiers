@@ -4,32 +4,43 @@ Service interne de stockage de fichiers chiffrés.
 
 ```
 coffre_fichiers/
-├── app/                  # service actuellement en production (à auditer)
+├── app/                  # service initial (vulnérable)
 │   ├── app.py            #   endpoints Flask
 │   ├── auth.py           #   mots de passe et tokens
 │   ├── config.py         #   paramètres et secrets
 │   ├── crypto_utils.py   #   chiffrement des fichiers
 │   └── sharing.py        #   partage de fichiers (RSA)
-└── exemples/             # fichiers de test
+├── app_correction/       # service sécurisé (version corrigée)
+├── exemples/             # fichiers de test
+├── start.sh              # script d'automatisation du lancement
+└── .env                  # variables d'environnement (secrets)
 ```
 
-## 1. Installation
+## 1. Configuration des secrets (`.env`)
 
-Python 3.10 ou plus récent.
+Avant de lancer l'application, assurez-vous d'avoir un fichier `.env` à la racine contenant vos clés secrètes :
+
+```env
+TOKEN_SECRET=be38e23a0b1746a363c0f2f007b3e9b04c78e76192f798c792f3313e2544fd3a
+MASTER_KEY=6b1f0c3e9a7d4e2f8c5b1a0d3e6f9c2b
+```
+
+## 2. Installation et Lancement avec `start.sh`
+
+Le script `start.sh` automatise la création de l'environnement virtuel, l'installation des dépendances, le chargement du `.env` et le démarrage du serveur.
+
+Rendez le script exécutable (si ce n'est pas déjà fait) puis lancez-le :
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows : .venv\Scripts\activate
-pip install -r requirements.txt
+chmod +x start.sh
+./start.sh
 ```
 
-## 2. Lancer le service
+Le service démarre sur **http://127.0.0.1:5000** (en utilisant la version sécurisée `app_correction.app`).
 
-```bash
-python -m app.app                  # http://127.0.0.1:5000
-```
+---
 
-Les commandes suivantes sont à lancer dans un autre terminal.
+## 3. Utilisation de l'API (à lancer dans un autre terminal)
 
 **Créer deux comptes**
 
@@ -69,6 +80,8 @@ curl http://127.0.0.1:5000/pubkey/bob
 ```
 
 Bob peut ensuite télécharger `file-1` avec son propre token.
+
+## Endpoints disponibles
 
 | Endpoint | Méthode | Authentifié | Description |
 |---|---|---|---|
