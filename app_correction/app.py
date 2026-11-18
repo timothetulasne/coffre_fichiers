@@ -7,6 +7,7 @@ import os
 import re
 
 from flask import Flask, jsonify, request
+from cryptography.hazmat.primitives import serialization
 
 from app.auth import generate_token, hash_password, verify_password, verify_token
 from app.crypto_utils import decrypt_bytes, derive_user_key, encrypt_bytes
@@ -52,9 +53,19 @@ def register():
         return error("utilisateur déjà existant", 409)
 
     private_key, public_key = generate_keypair()
+
+   # Sérialisation et chiffrement au repos de la clé privée avec la clé dérivée de l'utilisateur
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    user_key = derive_user_key(username)
+    private_key_blob = encrypt_bytes(private_pem, user_key)
+
     USERS[username] = {
         "password_hash": hash_password(password),
-        "private_key": private_key,
+        "private_key_blob": private_key_blob,
         "public_key": public_key,
     }
     return jsonify({"message": f"compte {username} créé"}), 201
@@ -136,9 +147,13 @@ def download(file_id):
         data = decrypt_bytes(entry["blob"], key)
 
     elif (file_id, username) in SHARES:
-        # Fichier partagé : on récupère d'abord la clé de fichier avec RSA
+        # Fichier partagé : déchiffrement à la volée de la clé privée RSA de l'utilisateur
         share = SHARES[(file_id, username)]
-        file_key = unwrap_key(share["wrapped_key"], USERS[username]["private_key"])
+        user_key = derive_user_key(username)
+        private_pem = decrypt_bytes(USERS[username]["private_key_blob"], user_key)
+        private_key = serialization.load_pem_private_key(private_pem, password=None)
+        
+        file_key = unwrap_key(share["wrapped_key"], private_key)
         data = decrypt_bytes(share["blob"], file_key)
 
     else:
