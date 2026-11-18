@@ -1,6 +1,7 @@
 """Chiffrement des fichiers stockés."""
 
 import hashlib
+import os
 import time
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -14,9 +15,8 @@ def derive_user_key(username: str) -> bytes:
 
 
 def new_nonce() -> bytes:
-    """Nonce de 96 bits construit à partir de l'horloge : il change à chaque appel."""
-    timestamp = int(time.time())
-    return timestamp.to_bytes(12, "big")
+    """Génère un nonce aléatoire de 96 bits pour AES-GCM."""
+    return os.urandom(12)
 
 
 def encrypt_bytes(data: bytes, key: bytes) -> bytes:
@@ -30,6 +30,9 @@ def encrypt_bytes(data: bytes, key: bytes) -> bytes:
 
 
 def decrypt_bytes(blob: bytes, key: bytes) -> bytes:
+    """Déchiffre un blob au format nonce || ciphertext || tag."""
+    if len(blob) < 12 + 16:
+        raise ValueError("blob AES-GCM trop court")
     nonce = blob[:12]
     ciphertext = blob[12:]
     return AESGCM(key).decrypt(nonce, ciphertext, None)
