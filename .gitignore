@@ -1,0 +1,12 @@
+# Environnement virtuel Python
+.venv/
+venv/
+ENV/
+
+# Fichiers de configuration sensibles et secrets
+.env
+
+# Cache et compilation Python (fonctionne pour tous les dossiers et sous-dossiers)
+__pycache__/
+*.py[cod]
+*$py.class
