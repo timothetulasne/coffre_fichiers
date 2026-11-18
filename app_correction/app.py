@@ -5,6 +5,8 @@ Lancement :  python -m app.app   (écoute sur http://127.0.0.1:5000)
 
 import os
 import re
+import hmac
+import hashlib
 
 from flask import Flask, jsonify, request
 from cryptography.hazmat.primitives import serialization
@@ -63,10 +65,16 @@ def register():
     user_key = derive_user_key(username)
     private_key_blob = encrypt_bytes(private_pem, user_key)
 
+    # Calcul d'un HMAC pour lier de manière intègre la clé publique au nom d'utilisateur
+    pub_pem_bytes = public_key_pem(public_key).encode()
+    from app.config import MASTER_KEY
+    pubkey_hmac = hmac.new(MASTER_KEY, username.encode() + pub_pem_bytes, hashlib.sha256).hexdigest()
+
     USERS[username] = {
         "password_hash": hash_password(password),
         "private_key_blob": private_key_blob,
         "public_key": public_key,
+        "public_key_hmac": pubkey_hmac,
     }
     return jsonify({"message": f"compte {username} créé"}), 201
 
@@ -176,6 +184,16 @@ def share(file_id):
     recipient = data.get("to", "")
     if recipient not in USERS or recipient == username:
         return error("destinataire invalide", 400)
+
+    recipient_user = USERS[recipient]
+
+    # verif integrite clé publique
+    pub_pem_bytes = public_key_pem(recipient_user["public_key"]).encode()
+    from app.config import MASTER_KEY
+    expected_hmac = hmac.new(MASTER_KEY, recipient.encode() + pub_pem_bytes, hashlib.sha256).hexdigest()
+    
+    if not hmac.compare_digest(recipient_user.get("public_key_hmac", ""), expected_hmac):
+        return error("intégrité clé publique compromise", 500)
 
     # 1. on déchiffre le fichier avec la clé du propriétaire
     plaintext = decrypt_bytes(entry["blob"], derive_user_key(username))
