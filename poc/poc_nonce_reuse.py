@@ -3,10 +3,10 @@ import time
 
 from app.app import app, STORAGE
 
-USERNAME = "poc_f5_user"
-PASSWORD = "poc_f5_password"
+USERNAME = "poc_user"
+PASSWORD = "poc_password"
 KNOWN_PLAINTEXT = b"FICHIER_CONNU: entete standard connu. " + b"A" * 128
-SECRET_PLAINTEXT = b"CONFIDENTIEL: contenu de demonstration F5, donnees protegees."
+SECRET_PLAINTEXT = b"CONFIDENTIEL: contenu de demonstration, donnees protegees."
 
 client = app.test_client()
 
@@ -50,4 +50,4 @@ print(f"[+] Fichier connu : {known_id}; fichier secret : {secret_id}")
 print(f"[+] Partie du clair récupérée sans clé : {recovered!r}")
 if recovered != expected:
     raise SystemExit("Échec de vérification : contenus ou blobs inattendus.")
-print("[+] F5 démontrée : récupération du texte clair via XOR des ciphertexts.")
+print("[+] Démontrée : récupération du texte clair via XOR des ciphertexts.")

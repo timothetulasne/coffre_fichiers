@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from app.app import app, USERS, STORAGE, SHARES
 from app.sharing import generate_keypair, wrap_key
 
-OWNER, RECIPIENT = "poc_f8_owner", "poc_f8_recipient"
+OWNER, RECIPIENT = "poc_owner", "poc_recipient"
 OWNER_PASSWORD, RECIPIENT_PASSWORD = "owner-pass-123", "recipient-pass-123"
 PLAINTEXT = b"PoC F8: fichier confidentiel partage avec le destinataire."
 
@@ -55,4 +55,4 @@ print(f"[+] Clé privée de {RECIPIENT} récupérée directement depuis USERS.")
 print(f"[+] Fichier partagé déchiffré : {recovered!r}")
 if recovered != PLAINTEXT:
     raise SystemExit("Le clair obtenu ne correspond pas au fichier envoyé.")
-print("[+] F8 démontrée : une lecture de USERS suffit pour accéder au partage.")
+print("[+] Démontrée : une lecture de USERS suffit pour accéder au partage.")

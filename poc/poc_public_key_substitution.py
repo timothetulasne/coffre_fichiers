@@ -4,9 +4,9 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from app.app import app, USERS, SHARES
 
-OWNER, VICTIM, ATTACKER = "poc_f10_owner", "poc_f10_victim", "poc_f10_attacker"
+OWNER, VICTIM, ATTACKER = "poc_owner", "poc_victim", "poc_attacker"
 PASSWORD = "local-poc-pass-123"
-SECRET_FILE = b"F10 demonstration: contenu partage normalement avec la victime."
+SECRET_FILE = b"Demonstration: contenu partage normalement avec la victime."
 
 client = app.test_client()
 
@@ -56,4 +56,4 @@ print(f"[+] Clé publique de {VICTIM!r} substituée par celle de {ATTACKER!r}.")
 print(f"[+] Le partage adressé à {VICTIM!r} a été déchiffré par l’attaquant : {recovered!r}")
 if recovered != SECRET_FILE:
     raise SystemExit("Le clair récupéré ne correspond pas au fichier déposé.")
-print("[+] F10 démontrée : l’association identité–clé publique n’est pas authentifiée.")
+print("[+] Démontrée : l’association identité–clé publique n’est pas authentifiée.")
